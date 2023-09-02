@@ -12,7 +12,7 @@ class MeuGrafo(GrafoListaAdjacencia):
         :return: Um objeto do tipo set que contém os pares de vértices não adjacentes
         '''
 
-        # o(n2)
+        # O(n^2)
         arestas = self.arestas
         vertices = self.vertices
         naoAdjacentes = set()
@@ -27,7 +27,8 @@ class MeuGrafo(GrafoListaAdjacencia):
                     adjacentes.append(v1)
             for vn in vertices:
                 if vn.rotulo != v.rotulo and vn.rotulo not in adjacentes:
-                    naoAdjacentes.add(f'{v.rotulo}-{vn.rotulo}')
+                    if f'{vn}-{v.rotulo}' not in naoAdjacentes:
+                        naoAdjacentes.add(f'{v.rotulo}-{vn}')
         return naoAdjacentes
 
 
@@ -37,7 +38,7 @@ class MeuGrafo(GrafoListaAdjacencia):
         :return: Um valor booleano que indica se existe algum laço.
         '''
 
-        # o(n)
+        # O(n)
         arestas = self.arestas
         for a in arestas:
             if arestas[a].v1.rotulo == arestas[a].v2.rotulo:
@@ -52,8 +53,8 @@ class MeuGrafo(GrafoListaAdjacencia):
         :raises: VerticeInvalidoError se o vértice não existe no grafo
         '''
 
-        # o(n)
-        if not self.existe_vertice(V):
+        # O(n)
+        if not self.existe_vertice(self.get_vertice(V)):
             raise VerticeInvalidoError()
         else:
             grau = 0
@@ -91,15 +92,15 @@ class MeuGrafo(GrafoListaAdjacencia):
         :raises: VerticeInvalidoException se o vértice não existe no grafo
         '''
 
-        # 0(n)
+        # O(n)
         arestas = self.arestas
-        if not self.existe_vertice(V):
+        if not self.existe_vertice(self.get_vertice(V)):
             raise VerticeInvalidoError()
         else:
-            arestasIncidentes = []
+            arestasIncidentes = set()
             for a in arestas:
                 if arestas[a].v1.rotulo == V or arestas[a].v2.rotulo == V:
-                    arestasIncidentes.append(arestas[a])
+                    arestasIncidentes.add(arestas[a].rotulo)
             return arestasIncidentes
 
     def eh_completo(self):
@@ -108,14 +109,13 @@ class MeuGrafo(GrafoListaAdjacencia):
         :return: Um valor booleano que indica se o grafo é completo
         '''
 
-        # O(n)
+        # O(n^2) -> função grau é O(n)
         if self.ha_paralelas() or self.ha_laco():
             return False
-
-        completo = len(self.vertices) - 1
-        vertices = self.vertices
-
-        for v in vertices:
-            if self.grau(v) != completo:
-                return False
-        return True
+        else:
+            completo = len(self.vertices) - 1
+            vertices = self.vertices
+            for v in vertices:
+                if self.grau(v.rotulo) != completo:
+                    return False
+            return True
